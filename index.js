@@ -8,8 +8,6 @@ const PORT = process.env.PORT || 3000
 app.use(express.json()) 
 app.use(require('morgan')('dev'))
 
-// Route handlers 
-
 // Get all the flavors 
 app.get('/api/flavors', async (req, res, next) => {
     try {
