@@ -8,7 +8,6 @@ const PORT = process.env.PORT || 3000
 app.use(express.json()) 
 app.use(require('morgan')('dev'))
 
-
 // Route handlers 
 
 // Get all the flavors 
@@ -57,12 +56,37 @@ app.post('/api/flavors', async (req, res, next) => {
 })
 
 // DELETE flavor by ID 
-
-
-
+app.delete('/api/flavors/:id', async (req, res, next) => {
+    try {
+        const flavorId = req.params.id 
+        const SQL = ` 
+            DELETE FROM flavors WHERE id = $1; 
+        `
+        await client.query(SQL, [flavorId])
+        res.sendStatus(204)
+    } catch(error) {
+        next(error)
+    }
+})
 
 // PUT update a flavor by ID 
-
+app.put('/api/flavors/:id', async (req, res, next) => {
+    try {
+        const flavorId = req.params.id 
+        const { name, is_favorite } = req.body 
+        const SQL = ` 
+            UPDATE flavors SET name = $1, is_favorite = $2, updated_at = now() WHERE id = $3
+            RETURNING *; 
+        `
+        const response = await client.query(SQL, [name, is_favorite, flavorId])
+        if (response.rows.length === 0) {
+            return res.status(404).send('Flavor not found')
+        }
+        res.send(response.rows[0])
+    } catch(error) {
+        next(error) 
+    }
+})
 
 const init = async () => { 
     try {
